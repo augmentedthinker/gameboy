@@ -1,8 +1,6 @@
-// 1. Get the screen (canvas) from the HTML
+// 1. Get the screen
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-console.log("Pong game loaded!");
 
 // --- CONFIGURATION ---
 const SCREEN_W = 160;
@@ -10,47 +8,56 @@ const SCREEN_H = 144;
 const PADDLE_W = 10;
 const PADDLE_H = 30;
 const BALL_SIZE = 6;
+
+const COLOR_BG = "#9bbc0f";    // Light green
 const COLOR_DARK = "#0f380f";
-const COLOR_LIGHT = "#9bbc0f";
 
-// --- GAME OBJECTS ---
+// --- GAME STATE ---
+let user = {};
+let com = {};
+let ball = {};
+let isPaused = false;
 
-// The User's Paddle (Left side)
-const user = {
-    x: 0,
-    y: SCREEN_H/2 - PADDLE_H/2,
-    w: PADDLE_W,
-    h: PADDLE_H,
-    color: COLOR_DARK,
-    score: 0
-};
-
-// The Computer's Paddle (Right side)
-const com = {
-    x: SCREEN_W - PADDLE_W,
-    y: SCREEN_H/2 - PADDLE_H/2,
-    w: PADDLE_W,
-    h: PADDLE_H,
-    color: COLOR_DARK,
-    score: 0
-};
-
-// The Ball
-const ball = {
-    x: SCREEN_W/2,
-    y: SCREEN_H/2,
-    size: BALL_SIZE,
-    speed: 2,
-    velocityX: 2,
-    velocityY: 2,
-    color: COLOR_DARK
-};
+// Initialize the game
+function init() {
+    user = {
+        x: 0,
+        y: SCREEN_H/2 - PADDLE_H/2,
+        w: PADDLE_W,
+        h: PADDLE_H,
+        score: 0
+    };
+    
+    com = {
+        x: SCREEN_W - PADDLE_W,
+        y: SCREEN_H/2 - PADDLE_H/2,
+        w: PADDLE_W,
+        h: PADDLE_H,
+        score: 0
+    };
+    
+    ball = {
+        x: SCREEN_W/2,
+        y: SCREEN_H/2,
+        size: BALL_SIZE,
+        speed: 2,
+        velocityX: 2,
+        velocityY: 2
+    };
+    
+    isPaused = false;
+}
 
 // --- DRAWING FUNCTIONS ---
-
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
+}
+
+function drawNet() {
+    for (let i = 0; i <= SCREEN_H; i += 10) {
+        drawRect(SCREEN_W/2 - 1, i, 2, 5, COLOR_DARK);
+    }
 }
 
 function drawText(text, x, y) {
@@ -59,16 +66,28 @@ function drawText(text, x, y) {
     ctx.fillText(text, x, y);
 }
 
-// Draw the net in the middle
-function drawNet() {
-    for (let i = 0; i <= SCREEN_H; i += 10) {
-        drawRect(SCREEN_W/2 - 1, i, 2, 5, COLOR_DARK);
+function draw() {
+    // Clear screen
+    drawRect(0, 0, SCREEN_W, SCREEN_H, COLOR_BG);
+    
+    drawNet();
+    drawText(user.score, SCREEN_W/4, SCREEN_H/5);
+    drawText(com.score, 3*SCREEN_W/4, SCREEN_H/5);
+    
+    drawRect(user.x, user.y, user.w, user.h, COLOR_DARK);
+    drawRect(com.x, com.y, com.w, com.h, COLOR_DARK);
+    drawRect(ball.x, ball.y, ball.size, ball.size, COLOR_DARK);
+    
+    if (isPaused) {
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.font = "20px monospace";
+        ctx.fillText("PAUSED", 45, 70);
     }
 }
 
-// --- GAME LOGIC ---
-
-// Check for collision between ball (b) and paddle (p)
+// --- UPDATE LOGIC ---
 function collision(b, p) {
     b.top = b.y;
     b.bottom = b.y + b.size;
@@ -91,6 +110,8 @@ function resetBall() {
 }
 
 function update() {
+    if (isPaused) return;
+
     // Move the ball
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
@@ -138,33 +159,20 @@ function update() {
     }
 }
 
-function render() {
-    // Clear screen
-    drawRect(0, 0, SCREEN_W, SCREEN_H, COLOR_LIGHT);
-
-    drawNet();
-    drawText(user.score, SCREEN_W/4, SCREEN_H/5);
-    drawText(com.score, 3*SCREEN_W/4, SCREEN_H/5);
-
-    drawRect(user.x, user.y, user.w, user.h, user.color);
-    drawRect(com.x, com.y, com.w, com.h, com.color);
-    drawRect(ball.x, ball.y, ball.size, ball.size, ball.color);
-}
-
-// The Game Loop
-let isPaused = false;
-
-function game() {
-    if (!isPaused) {
+// --- GAME LOOP ---
+let lastTime = Date.now();
+function gameLoop() {
+    let now = Date.now();
+    let delta = now - lastTime;
+    
+    // Update approx 60 FPS (1000ms / 60 = 16.6ms)
+    if (delta > 15) {
         update();
-    }
-    render();
-    
-    if (isPaused) {
-        drawText("PAUSED", SCREEN_W/2 - 30, SCREEN_H/2);
+        draw();
+        lastTime = Date.now();
     }
     
-    requestAnimationFrame(game);
+    requestAnimationFrame(gameLoop);
 }
 
 // --- CONTROLS ---
@@ -194,7 +202,9 @@ document.getElementById("btn-down").addEventListener("click", () => {
 // Pause Button (Start)
 document.getElementById("btn-start").addEventListener("click", () => {
     isPaused = !isPaused;
+    draw();
 });
 
 // Start the game
-game();
+init();
+gameLoop();
