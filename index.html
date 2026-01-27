@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Game Interface</title>
+    <style>
+        /* 
+           This CSS makes the HTML look like a Game Boy.
+           We use a font-family that looks digital if available, otherwise generic.
+        */
+        body {
+            background-color: #202020; /* Dark background for the webpage */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        /* The main plastic case of the Game Boy */
+        .gameboy {
+            background-color: #c0c0c0; /* Classic Grey */
+            width: 300px;
+            height: 500px;
+            border-radius: 10px 10px 40px 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The dark grey bezel around the screen */
+        .screen-area {
+            background-color: #555;
+            padding: 30px 40px;
+            border-radius: 10px 10px 30px 10px;
+            margin-bottom: 40px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* The actual screen where the game lives */
+        canvas {
+            background-color: #9bbc0f; /* The classic green screen color */
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+            /* We keep the resolution low (160x144) but scale it up to look big */
+            width: 200px; 
+            height: 180px;
+            image-rendering: pixelated; /* Keeps pixels sharp, not blurry */
+        }
+
+        /* Container for all controls */
+        .controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* The D-Pad (Directional Pad) */
+        .dpad {
+            position: relative;
+            width: 90px;
+            height: 90px;
+        }
+        
+        .dpad button {
+            background-color: #333;
+            border: none;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+        .dpad button:active { background-color: #111; }
+        
+        #btn-up { top: 0; left: 30px; border-radius: 5px 5px 0 0; }
+        #btn-down { bottom: 0; left: 30px; border-radius: 0 0 5px 5px; }
+        #btn-left { top: 30px; left: 0; border-radius: 5px 0 0 5px; }
+        #btn-right { top: 30px; right: 0; border-radius: 0 5px 5px 0; }
+        #btn-center { top: 30px; left: 30px; border-radius: 0; pointer-events: none;}
+
+        /* A and B Buttons */
+        .action-btns {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-top: 20px;
+        }
+
+        .round-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #8b1d3b; /* Dark Red */
+            border: none;
+            color: #ddd;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        .round-btn:active { box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
+
+    </style>
+</head>
+<body>
+
+    <div class="gameboy">
+        <!-- The Screen -->
+        <div class="screen-area">
+            <!-- 160x144 is the original Game Boy resolution -->
+            <canvas id="gameCanvas" width="160" height="144"></canvas>
+        </div>
+
+        <!-- The Controls -->
+        <div class="controls">
+            <div class="dpad">
+                <button id="btn-up"></button>
+                <button id="btn-left"></button>
+                <button id="btn-center"></button> <!-- Just for looks -->
+                <button id="btn-right"></button>
+                <button id="btn-down"></button>
+            </div>
+
+            <div class="action-btns">
+                <button class="round-btn" id="btn-b">B</button>
+                <button class="round-btn" id="btn-a">A</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARTRIDGE SLOT: Change this file to switch games! -->
+    <script src="tetris.js"></script>
+</body>
+</html>
