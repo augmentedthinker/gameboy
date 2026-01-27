@@ -113,6 +113,7 @@ function update() {
     // Eat Food
     if (snakeX == food.x && snakeY == food.y) {
         score++;
+        if(window.playSound) window.playSound('score');
         createFood();
         // We don't remove the tail, so the snake grows
     } else {
@@ -126,6 +127,7 @@ function update() {
 }
 
 function gameOver() {
+    if(window.playSound) window.playSound('gameover');
     alert("Game Over! Score: " + score);
     init();
 }
@@ -136,8 +138,8 @@ function gameLoop() {
     let now = Date.now();
     let delta = now - lastTime;
     
-    // Update every 100ms (10 frames per second)
-    if (delta > 100) {
+    // Update every 160ms (Slower for beginners)
+    if (delta > 160) {
         update();
         draw();
         lastTime = Date.now();

@@ -40,9 +40,9 @@ function init() {
         x: SCREEN_W/2,
         y: SCREEN_H/2,
         size: BALL_SIZE,
-        speed: 2,
-        velocityX: 2,
-        velocityY: 2
+        speed: 1, // Slower start speed (was 2)
+        velocityX: 1,
+        velocityY: 1
     };
     
     isPaused = false;
@@ -105,7 +105,7 @@ function collision(b, p) {
 function resetBall() {
     ball.x = SCREEN_W/2;
     ball.y = SCREEN_H/2;
-    ball.speed = 2;
+    ball.speed = 1; // Reset to slow speed
     ball.velocityX = -ball.velocityX; // Send it to the other player
 }
 
@@ -124,12 +124,14 @@ function update() {
     // Wall Collision (Top and Bottom)
     if (ball.y + ball.size > SCREEN_H || ball.y < 0) {
         ball.velocityY = -ball.velocityY;
+        if(window.playSound) window.playSound('hit');
     }
 
     // Paddle Collision
     let player = (ball.x < SCREEN_W/2) ? user : com;
 
     if (collision(ball, player)) {
+        if(window.playSound) window.playSound('hit');
         // Calculate where the ball hit the paddle
         // Top of paddle = -1, Middle = 0, Bottom = 1
         let collidePoint = (ball.y + ball.size/2) - (player.y + player.h/2);
@@ -146,15 +148,17 @@ function update() {
         ball.velocityY = ball.speed * Math.sin(angleRad);
 
         // Speed up the game every hit
-        ball.speed += 0.2;
+        ball.speed += 0.05; // Increase speed much slower (was 0.2)
     }
 
     // Score Points
     if (ball.x < 0) {
         com.score++;
+        if(window.playSound) window.playSound('score');
         resetBall();
     } else if (ball.x > SCREEN_W) {
         user.score++;
+        if(window.playSound) window.playSound('score');
         resetBall();
     }
 }

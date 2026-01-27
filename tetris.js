@@ -155,6 +155,7 @@ Piece.prototype.moveDown = function() {
         this.unDraw();
         this.y++;
         this.draw();
+        if(window.playSound) window.playSound('move');
     } else {
         // We hit something! Lock the piece and generate a new one
         this.lock();
@@ -168,6 +169,7 @@ Piece.prototype.moveRight = function() {
         this.unDraw();
         this.x++;
         this.draw();
+        if(window.playSound) window.playSound('move');
     }
 }
 
@@ -177,6 +179,7 @@ Piece.prototype.moveLeft = function() {
         this.unDraw();
         this.x--;
         this.draw();
+        if(window.playSound) window.playSound('move');
     }
 }
 
@@ -197,6 +200,7 @@ Piece.prototype.rotate = function() {
         this.tetrominoN = (this.tetrominoN + 1) % this.tetromino.length;
         this.activeTetromino = this.tetromino[this.tetrominoN];
         this.draw();
+        if(window.playSound) window.playSound('move');
     }
 }
 
@@ -222,11 +226,13 @@ Piece.prototype.collision = function(x, y, piece) {
 
 // Lock the piece into the board
 Piece.prototype.lock = function() {
+    if(window.playSound) window.playSound('hit');
     for (let r = 0; r < this.activeTetromino.length; r++) {
         for (let c = 0; c < this.activeTetromino.length; c++) {
             if (!this.activeTetromino[r][c]) continue;
             if (this.y + r < 0) {
                 // Game Over
+                if(window.playSound) window.playSound('gameover');
                 alert("Game Over");
                 document.location.reload();
                 break;
@@ -241,6 +247,7 @@ Piece.prototype.lock = function() {
             if (board[r][c] == VACANT) isRowFull = false;
         }
         if (isRowFull) {
+            if(window.playSound) window.playSound('score');
             // Move all rows above this one down
             for (let y = r; y > 1; y--) {
                 for (let c = 0; c < COL; c++) {
