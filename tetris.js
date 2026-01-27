@@ -260,10 +260,12 @@ drawBoard();
 
 // Drop the piece every 1 second
 let dropStart = Date.now();
+let isPaused = false;
+
 function drop() {
     let now = Date.now();
     let delta = now - dropStart;
-    if (delta > 1000) {
+    if (delta > 1000 && !isPaused) {
         p.moveDown();
         dropStart = Date.now();
     }
@@ -274,6 +276,7 @@ drop();
 // Control the piece
 document.addEventListener("keydown", CONTROL);
 function CONTROL(event) {
+    if (isPaused) return; // Disable controls when paused
     if (event.keyCode == 37) p.moveLeft();
     else if (event.keyCode == 38) p.rotate();
     else if (event.keyCode == 39) p.moveRight();
@@ -287,3 +290,19 @@ document.getElementById("btn-up").addEventListener("click", () => p.rotate());
 document.getElementById("btn-down").addEventListener("click", () => p.moveDown());
 document.getElementById("btn-a").addEventListener("click", () => p.rotate());
 document.getElementById("btn-b").addEventListener("click", () => p.moveDown());
+
+// Pause Button (Start)
+document.getElementById("btn-start").addEventListener("click", () => {
+    isPaused = !isPaused;
+    if (isPaused) {
+        // Draw PAUSED text
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.font = "20px monospace";
+        ctx.fillText("PAUSED", 45, 70);
+    } else {
+        drawBoard(); // Redraw board to clear the text
+        p.draw();
+    }
+});

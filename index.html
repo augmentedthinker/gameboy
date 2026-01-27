@@ -15,6 +15,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            flex-direction: column; /* Stack Game Boy and buttons vertically */
             margin: 0;
             font-family: sans-serif;
         }
@@ -104,6 +105,51 @@
         }
         .round-btn:active { box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
 
+        /* Start and Select Buttons (Angled Pills) */
+        .start-select {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .pill-btn {
+            width: 60px;
+            height: 15px;
+            border-radius: 10px;
+            background-color: #999;
+            border: none;
+            transform: rotate(-25deg);
+            cursor: pointer;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            font-size: 10px;
+            color: #333;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 10px; /* Space for the label */
+        }
+        .pill-btn:active { box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5); }
+
+        /* The "Cartridge" selection buttons */
+        .cartridge-select {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .cartridge-btn {
+            padding: 10px 20px;
+            background-color: #444;
+            color: white;
+            border: 2px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+        .cartridge-btn:hover { background-color: #666; }
+
     </style>
 </head>
 <body>
@@ -130,9 +176,71 @@
                 <button class="round-btn" id="btn-a">A</button>
             </div>
         </div>
+
+        <!-- Start and Select -->
+        <div class="start-select">
+            <button class="pill-btn" id="btn-select">SELECT</button>
+            <button class="pill-btn" id="btn-start">START</button>
+        </div>
     </div>
 
-    <!-- CARTRIDGE SLOT: Change this file to switch games! -->
-    <script src="tetris.js"></script>
+    <!-- External buttons to switch games (Like swapping cartridges) -->
+    <div class="cartridge-select">
+        <button class="cartridge-btn" onclick="window.location.search='?game=tetris'">Tetris</button>
+        <button class="cartridge-btn" onclick="window.location.search='?game=pong'">Pong</button>
+        <button class="cartridge-btn" onclick="window.location.search='?game=snake'">Snake</button>
+    </div>
+
+    <!-- DYNAMIC CARTRIDGE LOADER -->
+    <script>
+        // 1. Check the URL for "?game=pong" or "?game=tetris"
+        const params = new URLSearchParams(window.location.search);
+        const game = params.get('game') || 'tetris'; // Default to Tetris if nothing selected
+        
+        // 2. Create a script tag for that game and add it to the page
+        const script = document.createElement('script');
+        script.src = game + '.js';
+        script.onerror = function() {
+            alert("Failed to load " + game + ".js! Check if the file is saved and named correctly.");
+        };
+        document.body.appendChild(script);
+    </script>
+
+    <!-- MUSIC ENGINE (Simple Browser Synthesizer) -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let musicInterval;
+        let isMusicPlaying = false;
+
+        // Play a single beep/note
+        function playNote(frequency, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square'; // "Square" wave sounds like 8-bit NES/GameBoy
+            osc.frequency.value = frequency;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Toggle the background beat
+        document.getElementById('btn-select').addEventListener('click', () => {
+            if (isMusicPlaying) {
+                clearInterval(musicInterval);
+                isMusicPlaying = false;
+            } else {
+                isMusicPlaying = true;
+                // A simple bassline loop
+                let tick = 0;
+                const melody = [110, 0, 110, 0, 130, 0, 146, 0]; 
+                musicInterval = setInterval(() => {
+                    if (melody[tick] > 0) playNote(melody[tick], 0.1);
+                    tick = (tick + 1) % melody.length;
+                }, 200);
+            }
+        });
+    </script>
 </body>
 </html>
